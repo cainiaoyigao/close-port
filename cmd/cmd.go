@@ -26,7 +26,7 @@ func (h Handle) Handing() {
 		return
 	}
 	name := h.GetAppName(pid)
-	fmt.Printf("pid %d : appName ：%s \n", pid, name)
+	fmt.Printf("pid : %d , appName：%s \n", pid, name)
 	fmt.Printf("是否关闭进程 %s（1 是 0 否）\n", name)
 	var enterStr string
 	_, err = fmt.Scan(&enterStr)
@@ -44,5 +44,7 @@ func (h Handle) Handing() {
 		if ok {
 			fmt.Printf("pid： %v 程序成功关闭", pid)
 		}
+	} else {
+		fmt.Printf("pid： %v 未关闭 \n", pid)
 	}
 }

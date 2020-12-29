@@ -2,6 +2,7 @@ package cmdhandle
 
 import (
 	"bytes"
+	"close-port/utils"
 	"fmt"
 	"log"
 	"os/exec"
@@ -25,7 +26,7 @@ func NewWinHandle() *winHandle {
 func (wh winHandle) PortInUse(portNumber int) int {
 	res := -1
 	var outBytes bytes.Buffer
-	pth := fmt.Sprintf("0.0.0.0:%d", portNumber)
+	pth := fmt.Sprintf("0.0.0.0:%d ", portNumber)
 	cmdStr := fmt.Sprintf("netstat -ano -p tcp | findstr %s", pth)
 	cmd := exec.Command("cmd", "/c", cmdStr)
 	cmd.Stdout = &outBytes
@@ -42,18 +43,33 @@ func (wh winHandle) PortInUse(portNumber int) int {
 }
 
 func (wh winHandle) GetName(pid int) string {
-	var outBytes bytes.Buffer
+	//var outBytes bytes.Buffer
+	//var stderr bytes.Buffer
 	cmdStr := fmt.Sprintf("tasklist | findstr %d", pid)
+	//fmt.Println(cmds)
+	//cmd := exec.Command("tasklist",  cmds...)
+	//cmd.Stdout = &outBytes
+	//cmd.Stderr = &stderr
+	//err := cmd.Run()
+
 	cmd := exec.Command("cmd", "/c", cmdStr)
-	cmd.Stdout = &outBytes
-	err := cmd.Run()
+	out, err := cmd.CombinedOutput()
+	stderrs := utils.ConvertByte2String(out, "GB18030")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(fmt.Sprint(err) + ": " + stderrs)
+		return "不存在"
 	}
-	resStr := outBytes.String()
-	fmt.Println(resStr)
-	resArray := regexp.MustCompile(`[^ ]+`).FindAllString(resStr, -1)
-	return resArray[0]
+	resStr := out
+	decodeBytes := utils.ConvertByte2String(resStr, "GB18030")
+	fmt.Println(decodeBytes)
+
+	resArray := regexp.MustCompile(`\s+`).Split(decodeBytes, -1)
+	for i, v := range resArray {
+		if strconv.Itoa(pid) == v {
+			return resArray[i-1]
+		}
+	}
+	return "不存在"
 }
 
 func (wh winHandle) KillApp(pid int) bool {
