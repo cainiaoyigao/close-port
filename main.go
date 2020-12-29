@@ -1,8 +1,12 @@
 package main
 
-import "close-port/cmd"
+import (
+	"close-port/work"
+)
 
 func main() {
-	handler := cmdhandle.NewWinHandle()
-	handler.Handing()
+	workHandler := work.NewWorkHandle()
+	for {
+		workHandler.LoopWork()
+	}
 }

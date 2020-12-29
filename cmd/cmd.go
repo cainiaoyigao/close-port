@@ -18,6 +18,7 @@ func (h Handle) Handing() {
 	reqId, err := strconv.Atoi(reqPid)
 	if err != nil {
 		panic(err)
+		return
 	}
 	pid := h.PortInUse(reqId)
 	if pid == -1 {
@@ -25,22 +26,23 @@ func (h Handle) Handing() {
 		return
 	}
 	name := h.GetAppName(pid)
-	fmt.Printf("pid %d : %s appName ：\n", pid, name)
+	fmt.Printf("pid %d : appName ：%s \n", pid, name)
 	fmt.Printf("是否关闭进程 %s（1 是 0 否）\n", name)
 	var enterStr string
 	_, err = fmt.Scan(&enterStr)
 	if err != nil {
 		panic(err)
+		return
 	}
 	req, err := strconv.Atoi(enterStr)
 	if err != nil {
 		panic(err)
+		return
 	}
 	if req == 1 {
 		ok := h.KillApp(pid)
 		if ok {
 			fmt.Printf("pid： %v 程序成功关闭", pid)
 		}
-
 	}
 }
