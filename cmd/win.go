@@ -1,4 +1,4 @@
-package cmd
+package cmdhandle
 
 import (
 	"bytes"
@@ -15,7 +15,11 @@ type winHandle struct {
 }
 
 func NewWinHandle() *winHandle {
-	return &winHandle{}
+	win := &winHandle{}
+	win.Handle.PortInUse = win.PortInUse
+	win.Handle.GetAppName = win.GetName
+	win.Handle.KillApp = win.KillApp
+	return win
 }
 
 func (wh winHandle) PortInUse(portNumber int) int {
@@ -52,7 +56,7 @@ func (wh winHandle) GetName(pid int) string {
 	return resArray[0]
 }
 
-func (wh winHandle) KillApp(pid int) string {
+func (wh winHandle) KillApp(pid int) bool {
 	var outBytes bytes.Buffer
 	cmdStr := fmt.Sprintf("taskkill  /pid %d /F", pid)
 	cmd := exec.Command("cmd", "/c", cmdStr)
@@ -61,6 +65,5 @@ func (wh winHandle) KillApp(pid int) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	resStr := outBytes.String()
-	return resStr
+	return true
 }

@@ -1,4 +1,4 @@
-package cmd
+package cmdhandle
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 type Handle struct {
 	PortInUse  func(portNumber int) int
 	GetAppName func(pid int) string
-	KillApp    func(pid int) string
+	KillApp    func(pid int) bool
 }
 
 func (h Handle) Handing() {
@@ -37,7 +37,10 @@ func (h Handle) Handing() {
 		panic(err)
 	}
 	if req == 1 {
-		killStr := h.KillApp(pid)
-		fmt.Printf("输出： %s", killStr)
+		ok := h.KillApp(pid)
+		if ok {
+			fmt.Printf("pid： %v 程序成功关闭", pid)
+		}
+
 	}
 }
