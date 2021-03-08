@@ -87,7 +87,7 @@ func (wh winHandle) KillApp(pid int) bool {
 }
 
 func (wh winHandle) GetFuzzy(name string) []entity.AppInfo {
-	cmdStr := fmt.Sprintf("tasklist | findstr %s", name)
+	cmdStr := fmt.Sprintf("tasklist /fo csv | findstr %s", name)
 	cmd := exec.Command("cmd", "/c", cmdStr)
 	out, err := cmd.CombinedOutput()
 	stderrs := utils.ConvertByte2String(out, "GB18030")
@@ -98,7 +98,7 @@ func (wh winHandle) GetFuzzy(name string) []entity.AppInfo {
 	resStr := out
 	decodeBytes := utils.ConvertByte2String(resStr, "GB18030")
 
-	resArray2 := regexp.MustCompile(`\b[\w.%+-]+\.[a-zA-Z]+\s+[\d]+\b`).FindAllString(decodeBytes, -1)
+	resArray2 := regexp.MustCompile(`\b[\w.%+-]+\.[a-zA-Z]+\"\,\"+[\d]+\b`).FindAllString(decodeBytes, -1)
 	apps := make([]entity.AppInfo, 0)
 	for _, v := range resArray2 {
 		pid, err := strconv.Atoi(regexp.MustCompile(`\b[\d]+\b`).FindString(v))
