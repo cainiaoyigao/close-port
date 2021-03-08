@@ -2,6 +2,7 @@ package cmdhandle
 
 import (
 	"bytes"
+	"close-port/entity"
 	"close-port/utils"
 	"fmt"
 	"log"
@@ -20,6 +21,7 @@ func NewWinHandle() *winHandle {
 	win.Handle.PortInUse = win.PortInUse
 	win.Handle.GetAppName = win.GetName
 	win.Handle.KillApp = win.KillApp
+	win.Handle.GetFuzzy = win.GetFuzzy
 	return win
 }
 
@@ -82,4 +84,32 @@ func (wh winHandle) KillApp(pid int) bool {
 		log.Fatal(err)
 	}
 	return true
+}
+
+func (wh winHandle) GetFuzzy(name string) []entity.AppInfo {
+	cmdStr := fmt.Sprintf("tasklist | findstr %s", name)
+	cmd := exec.Command("cmd", "/c", cmdStr)
+	out, err := cmd.CombinedOutput()
+	stderrs := utils.ConvertByte2String(out, "GB18030")
+	if err != nil {
+		fmt.Println(fmt.Sprint(err) + ": " + stderrs)
+		return nil
+	}
+	resStr := out
+	decodeBytes := utils.ConvertByte2String(resStr, "GB18030")
+
+	resArray2 := regexp.MustCompile(`\b[\w.%+-]+\.[a-zA-Z]+\s+[\d]+\b`).FindAllString(decodeBytes, -1)
+	apps := make([]entity.AppInfo, 0)
+	for _, v := range resArray2 {
+		pid, err := strconv.Atoi(regexp.MustCompile(`\b[\d]+\b`).FindString(v))
+		if err != nil {
+			panic(err)
+			return nil
+		}
+		apps = append(apps, entity.AppInfo{
+			Name: regexp.MustCompile(`\b[\w.%+-]+\.[a-zA-Z]+\b`).FindString(v),
+			Pid:  pid,
+		})
+	}
+	return apps
 }

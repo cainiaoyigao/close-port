@@ -11,5 +11,5 @@ func NewWorkHandle() *workHandle {
 
 func (wh *workHandle) LoopWork() {
 	handler := cmdhandle.NewWinHandle()
-	handler.Handing()
+	handler.FuzzyHanding()
 }
